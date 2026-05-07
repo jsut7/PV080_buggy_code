@@ -2,6 +2,8 @@ import sys
 import os
 import yaml
 import flask
+import urllib3
+import urllib.request as urllib_request
 
 app = flask.Flask(__name__)
 
@@ -24,13 +26,17 @@ def print_nametag(format_string, person):
 
 
 def fetch_website(urllib_version, url):
-    # Import the requested version (2 or 3) of urllib
-    exec(f"import urllib{urllib_version} as urllib", globals())
-    # Fetch and print the requested URL
- 
-    try: 
-        http = urllib.PoolManager()
-        r = http.request('GET', url)
+    # Import/use only explicitly supported urllib variants (2 or 3)
+    version = str(urllib_version).strip()
+
+    try:
+        if version == "3":
+            http = urllib3.PoolManager()
+            r = http.request('GET', url)
+        elif version == "2":
+            r = urllib_request.urlopen(url)
+        else:
+            raise ValueError("Unsupported urllib version. Use '2' or '3'.")
     except:
         print('Exception')
 
